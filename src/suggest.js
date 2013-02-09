@@ -1,18 +1,24 @@
 /*
 --------------------------------------------------------
-Input Suggest
+suggest.js - Input Suggest
+入力補完ライブラリ
 
-入力補完を行うライブラリです。
-使用方法、ライセンスについては、下記を参照してください。
+Released under the Creative Commons License(Attribution 2.1 Japan):
+クリエイティブ・コモンズの帰属 2.1 Japanライセンスの下でライセンスされています。
+ http://creativecommons.org/licenses/by/2.1/jp/
 
-http://www.enjoyxstudy.com/javascript/suggest
+For details, see the web site:
+使用方法については、下記を参照してください。
+ http://www.enjoyxstudy.com/javascript/suggest
 
 --------------------------------------------------------
 - Enjyo×Study <http://www.enjoyxstudy.com>
 --------------------------------------------------------
 
-v0.1 2006/01/15
-     ・公開
+ver 0.1 2006/01/15
+  ・公開
+ver 0.2 2006/02/05
+  ・機能改善
 --------------------------------------------------------
 */
 
@@ -25,26 +31,34 @@ IncSearch.Suggest.prototype = {
     this.suggestArea = $(suggestArea);
     this.candidateList = candidateList;
 
+    this.suggestList = null;
+    this.activePosition = null;
+    this.timer = null;
+
     this.oldText = this.input.value;
 
     if (arguments[3]) this.setOptions(arguments[3]);
 
     // reg event
+    Event.observe(this.input, 'focus', this.checkLoop.bindAsEventListener(this), false);
     Event.observe(this.input, 'blur', this.blur.bindAsEventListener(this), false);
-    Event.observe(this.input, 'keyup', this.keyup.bindAsEventListener(this), false);
+
+    if (window.opera) {
+      Event._observeAndCache(this.input, 'keypress', this.keyevent.bindAsEventListener(this), false);
+    } else {
+      Event.observe(this.input, 'keypress', this.keyevent.bindAsEventListener(this), false);
+    }
 
     // init
     this.clearSuggestArea();
-
-    // start checking...
-    this.checkLoop();
   },
 
   // options
   interval: 500,
   dispMax: 20,
+  listTagName: 'div',
   isMatch: function(value, pattern) {
-    return (value.indexOf(pattern) != -1);
+    return (value.toLowerCase().indexOf(pattern.toLowerCase()) != -1);
   },
   activeDisplay: function(elm) {
     elm.style.backgroundColor = '#3366FF';
@@ -77,6 +91,9 @@ IncSearch.Suggest.prototype = {
 
     if (options.moverDisplay)
       this.moverDisplay = options.moverDisplay;
+
+    if (options.listTagName)
+      this.listTagName = options.listTagName;
   },
 
   checkLoop: function() {
@@ -84,16 +101,30 @@ IncSearch.Suggest.prototype = {
       this.oldText = this.input.value;
       this.search();
     }
-
-    setTimeout(this.checkLoop.bind(this), this.interval);
+    if (this.timer) clearTimeout(this.timer);
+    this.timer = setTimeout(this.checkLoop.bind(this), this.interval);
   },
 
-  // keydown/up
-  keyup: function(event) {
+  // key event
+  keyevent: function(event) {
     if (event.keyCode == Event.KEY_UP ||
         event.keyCode == Event.KEY_DOWN) {
       // key move
       this.moveActiveList(event.keyCode);
+    } else if (event.keyCode == Event.KEY_RETURN) {
+      // fix
+      if (this.suggestList) {
+        Event.stop(event);
+        this.clearSuggestArea();
+      }
+    } else if (event.keyCode == Event.KEY_ESC) {
+      // cancel
+      if (this.suggestList) {
+        Event.stop(event);
+        this.clearSuggestArea();
+        this.input.value = this.inputText;
+        this.oldText = this.input.value;
+      }
     }
   },
 
@@ -113,7 +144,7 @@ IncSearch.Suggest.prototype = {
       if (this.isMatch(this.candidateList[i], pattern)) {
         resultList.push(this.candidateList[i]);
 
-        if (resultList.length >= this.dispMax) break;
+        if (this.dispMax != 0 && resultList.length >= this.dispMax) break;
       }
     }
 
@@ -125,8 +156,8 @@ IncSearch.Suggest.prototype = {
   clearSuggestArea: function() {
     this.suggestArea.innerHTML = '';
     this.suggestArea.style.display = 'none';
-    this.suggestList = undefined;
-    this.activePosition = undefined;
+    this.suggestList = null;
+    this.activePosition = null;
   },
 
   createSuggestArea: function(resultList) {
@@ -135,7 +166,7 @@ IncSearch.Suggest.prototype = {
     this.inputText = this.input.value;
 
     for (var i = 0; i < resultList.length; i++) {
-      var elm = document.createElement('div');
+      var elm = document.createElement(this.listTagName);
       elm.innerHTML = resultList[i];
       this.suggestArea.appendChild(elm);
 
@@ -163,25 +194,28 @@ IncSearch.Suggest.prototype = {
 
     if (keyCode == Event.KEY_UP) {
       // up
-      if (this.activePosition == undefined) return;
-
-      this.activePosition--;
-      if (this.activePosition < 0) {
-        this.activePosition = 0;
-
-        this.input.value = this.inputText;
-        return;
+      if (this.activePosition == null) {
+        this.activePosition = this.suggestList.length -1;
+      }else{
+        this.activePosition--;
+        if (this.activePosition < 0) {
+          this.activePosition = null;
+          this.input.value = this.inputText;
+          return;
+        }
       }
     }else{
       // down
-      if (this.activePosition == undefined) {
+      if (this.activePosition == null) {
         this.activePosition = 0;
       }else{
         this.activePosition++;
       }
 
       if (this.activePosition >= this.suggestList.length) {
-        this.activePosition = this.suggestList.length -1;
+        this.activePosition = null;
+        this.input.value = this.inputText;
+        return;
       }
     }
 
@@ -199,23 +233,26 @@ IncSearch.Suggest.prototype = {
 
   unactive: function() {
 
-    if (this.suggestList != undefined 
+    if (this.suggestList != null 
         && this.suggestList.length > 0
-        && this.activePosition != undefined) {
+        && this.activePosition != null) {
       this.unactiveDisplay(this.suggestList[this.activePosition]);
     }
   },
 
   blur: function(event) {
 
-    this.blurCancel = false;
     this.unactive();
-    setTimeout((function(){ if (!this.blurCancel) this.clearSuggestArea(); }).bind(this), 500);
+    this.oldText = this.input.value;
+
+    if (this.timer) clearTimeout(this.timer);
+    this.timer = null;
+
+    setTimeout((function(){ this.clearSuggestArea(); }).bind(this), 500);
   },
 
   listClick: function(event, index) {
 
-    this.blurCancel = true;
     var elm = Event.element(event);
 
     this.unactive();
@@ -240,4 +277,4 @@ IncSearch.Suggest.prototype = {
       this.unactiveDisplay(elm);
     }
   }
-}
+};
