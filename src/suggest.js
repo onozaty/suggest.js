@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------
 suggest.js - Input Suggest
-Version 2.0 (Update 2007/05/06)
+Version 2.0.1 (Update 2007/06/27)
 
 - onozaty (http://www.enjoyxstudy.com)
 
@@ -128,6 +128,8 @@ Suggest.Local.prototype = {
   },
 
   isMatch: function(value, pattern) {
+
+    if (value == null) return null;
 
     var pos = (this.ignoreCase) ?
       value.toLowerCase().indexOf(pattern.toLowerCase())
