@@ -23,6 +23,8 @@ ver 0.2 2006/02/05
   ・機能改善
 ver 1.0 2006/02/18
   ・オプションの見直し
+ver 1.1 2006/03/02
+  ・タグ補完(複数キーワード)機能を追加
 --------------------------------------------------------
 */
 
@@ -39,10 +41,12 @@ IncSearch.Suggest.prototype = {
     this.candidateList = candidateList;
 
     this.suggestList = null;
+    this.suggestIndexList = null;
     this.activePosition = null;
     this.timer = null;
 
-    this.oldText = this.input.value;
+    this.inputValueBackup = null;
+    this.oldText = this.getInputText();
 
     if (arguments[3]) this.setOptions(arguments[3]);
 
@@ -123,8 +127,9 @@ IncSearch.Suggest.prototype = {
   },
 
   checkLoop: function() {
-    if (this.input.value != this.oldText) {
-      this.oldText = this.input.value;
+    var text = this.getInputText();
+    if (text != this.oldText) {
+      this.oldText = text;
       this.search();
     }
     if (this.timer) clearTimeout(this.timer);
@@ -148,8 +153,8 @@ IncSearch.Suggest.prototype = {
       if (this.suggestList) {
         Event.stop(event);
         this.clearSuggestArea();
-        this.input.value = this.inputText;
-        this.oldText = this.input.value;
+        this.input.value = this.inputValueBackup;
+        this.oldText = this.getInputText();
       }
     }
   },
@@ -159,17 +164,19 @@ IncSearch.Suggest.prototype = {
     // init
     this.clearSuggestArea();
 
-    if (this.input.value == '') return;
-
-    var pattern = this.input.value;
+    var text = this.getInputText();
+    if (text == '') return;
 
     var resultList = new Array();
     var temp = null; 
 
+    this.suggestIndexList = new Array();
+
     for (var i = 0; i < this.candidateList.length; i++) {
 
-      if ((temp = this.isMatch(this.candidateList[i], pattern)) != null) {
+      if ((temp = this.isMatch(this.candidateList[i], text)) != null) {
         resultList.push(temp);
+        this.suggestIndexList.push(i);
 
         if (this.dispMax != 0 && resultList.length >= this.dispMax) break;
       }
@@ -184,13 +191,14 @@ IncSearch.Suggest.prototype = {
     this.suggestArea.innerHTML = '';
     this.suggestArea.style.display = 'none';
     this.suggestList = null;
+    this.suggestIndexList = null;
     this.activePosition = null;
   },
 
   createSuggestArea: function(resultList) {
 
     this.suggestList = new Array();
-    this.inputText = this.input.value;
+    this.inputValueBackup = this.input.value;
 
     for (var i = 0; i < resultList.length; i++) {
       var elm = document.createElement(this.listTagName);
@@ -227,7 +235,7 @@ IncSearch.Suggest.prototype = {
         this.activePosition--;
         if (this.activePosition < 0) {
           this.activePosition = null;
-          this.input.value = this.inputText;
+          this.input.value = this.inputValueBackup;
           return;
         }
       }
@@ -241,21 +249,21 @@ IncSearch.Suggest.prototype = {
 
       if (this.activePosition >= this.suggestList.length) {
         this.activePosition = null;
-        this.input.value = this.inputText;
+        this.input.value = this.inputValueBackup;
         return;
       }
     }
 
-    this.active(this.suggestList[this.activePosition]);
+    this.active(this.activePosition);
   },
 
-  active: function(activeElement) {
+  active: function(index) {
 
-    this.activeDisplay(activeElement);
+    this.activeDisplay(this.suggestList[index]);
 
-    this.input.value = this.highlight ?
-      activeElement.innerHTML.replace(/<strong>|<\/strong>/gi, '') : activeElement.innerHTML;
-    this.oldText = this.input.value;
+    this.setInputText(this.candidateList[this.suggestIndexList[index]]);
+
+    this.oldText = this.getInputText();
     this.input.focus();
   },
 
@@ -271,7 +279,7 @@ IncSearch.Suggest.prototype = {
   blur: function(event) {
 
     this.unactive();
-    this.oldText = this.input.value;
+    this.oldText = this.getInputText();
 
     if (this.timer) clearTimeout(this.timer);
     this.timer = null;
@@ -281,11 +289,9 @@ IncSearch.Suggest.prototype = {
 
   listClick: function(event, index) {
 
-    var elm = Event.element(event);
-
     this.unactive();
     this.activePosition = index;
-    this.active(elm);
+    this.active(index);
   },
 
   listOver: function(event, index) {
@@ -304,5 +310,109 @@ IncSearch.Suggest.prototype = {
     }else{
       this.unactiveDisplay(elm);
     }
+  },
+
+  getInputText: function() {
+    return this.input.value;
+  },
+
+  setInputText: function(text) {
+    this.input.value = text;
   }
 };
+
+/*-- IncSearch.SuggestTag --------------------------------*/
+IncSearch.SuggestTag = Class.create();
+Object.extend(Object.extend(IncSearch.SuggestTag.prototype, IncSearch.Suggest.prototype), {
+
+  // delimiter
+  delim: ' ',
+
+  // key event
+  keyevent: function(event) {
+    if (event.keyCode == Event.KEY_UP ||
+        event.keyCode == Event.KEY_DOWN) {
+      // key move
+      this.moveActiveList(event.keyCode);
+    } else if (event.keyCode == Event.KEY_RETURN) {
+      // fix
+      if (this.suggestList) {
+        Event.stop(event);
+        this.clearSuggestArea();
+
+        this.input.value += this.delim;
+        this.moveEnd();
+      }
+    } else if (event.keyCode == Event.KEY_TAB) {
+      // fix
+      if (this.suggestList) {
+        if (!this.activePosition) {
+          this.activePosition = 0;
+          this.active(this.activePosition);
+        }
+
+        this.clearSuggestArea();
+        this.input.value += this.delim;
+        setTimeout(this.moveEnd.bind(this),5); // Opera
+
+        Event.stop(event);
+      }
+    } else if (event.keyCode == Event.KEY_ESC) {
+      // cancel
+      if (this.suggestList) {
+        Event.stop(event);
+        this.clearSuggestArea();
+        this.input.value = this.inputValueBackup;
+        this.oldText = this.getInputText();
+      }
+    }
+  },
+
+  listClick: function(event, index) {
+
+    this.unactive();
+    this.activePosition = index;
+    this.active(index);
+
+    this.input.value += this.delim;
+    this.moveEnd();
+  },
+
+  getInputText: function() {
+
+    var pos = this.getLastTokenPos();
+
+    if (pos == -1) {
+      return this.input.value;
+    } else {
+      return this.input.value.substr(pos + 1);
+    }
+  },
+
+  setInputText: function(text) {
+
+    var pos = this.getLastTokenPos();
+
+    if (pos == -1) {
+      this.input.value = text;
+    } else {
+      this.input.value = this.input.value.substr(0 , pos + 1) + text;
+    }
+  },
+
+  getLastTokenPos: function() {
+    return this.input.value.lastIndexOf(this.delim);
+  },
+
+  moveEnd: function() {
+
+    if (this.input.createTextRange) {
+      this.input.focus(); // Opera
+      var range = this.input.createTextRange();
+      range.move('character', this.input.value.length);
+      range.select();
+    } else if (this.input.setSelectionRange) {
+      this.input.setSelectionRange(this.input.value.length, this.input.value.length);
+    }
+  }
+});
