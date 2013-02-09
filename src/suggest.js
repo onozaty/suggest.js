@@ -1,9 +1,9 @@
 /*
 --------------------------------------------------------
 suggest.js - Input Suggest
-Version 2.1.1 (Update 2009/10/04)
+Version 2.2 (Update 2010/09/14)
 
-Copyright (c) 2006-2009 onozaty (http://www.enjoyxstudy.com)
+Copyright (c) 2006-2010 onozaty (http://www.enjoyxstudy.com)
 
 Released under an MIT-style license.
 
@@ -174,6 +174,7 @@ Suggest.Local.prototype = {
     }
 
     this.suggestArea.style.display = '';
+    this.suggestArea.scrollTop = 0;
   },
 
   getInputText: function() {
@@ -250,6 +251,7 @@ Suggest.Local.prototype = {
         if (this.activePosition < 0) {
           this.activePosition = null;
           this.input.value = this.inputValueBackup;
+          this.suggestArea.scrollTop = 0;
           return;
         }
       }
@@ -264,6 +266,7 @@ Suggest.Local.prototype = {
       if (this.activePosition >= this.suggestList.length) {
         this.activePosition = null;
         this.input.value = this.inputValueBackup;
+        this.suggestArea.scrollTop = 0;
         return;
       }
     }
@@ -335,6 +338,16 @@ Suggest.Local.prototype = {
 
   setStyleActive: function(element) {
     element.className = this.classSelect;
+
+    // auto scroll
+    var offset = element.offsetTop;
+    var offsetWithHeight = offset + element.clientHeight;
+
+    if (this.suggestArea.scrollTop > offset) {
+      this.suggestArea.scrollTop = offset
+    } else if (this.suggestArea.scrollTop + this.suggestArea.clientHeight < offsetWithHeight) {
+      this.suggestArea.scrollTop = offsetWithHeight - this.suggestArea.clientHeight;
+    }
   },
 
   setStyleUnactive: function(element) {
