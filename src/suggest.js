@@ -3,27 +3,34 @@
 suggest.js - Input Suggest
 入力補完ライブラリ
 
+- onozaty (http://www.enjoyxstudy.com)
+
 Released under the Creative Commons License(Attribution 2.1 Japan):
 クリエイティブ・コモンズの帰属 2.1 Japanライセンスの下でライセンスされています。
  http://creativecommons.org/licenses/by/2.1/jp/
+
+depends on prototype.js(http://prototype.conio.net/)
+本ライブラリの使用にあたっては、prototype.jsが必要です。
 
 For details, see the web site:
 使用方法については、下記を参照してください。
  http://www.enjoyxstudy.com/javascript/suggest
 
 --------------------------------------------------------
-- Enjyo×Study <http://www.enjoyxstudy.com>
---------------------------------------------------------
-
 ver 0.1 2006/01/15
   ・公開
 ver 0.2 2006/02/05
   ・機能改善
+ver 1.0 2006/02/18
+  ・オプションの見直し
 --------------------------------------------------------
 */
 
-var IncSearch = {};
+if (!IncSearch) {
+  var IncSearch = {};
+}
 
+/*-- IncSearch.Suggest --------------------------------*/
 IncSearch.Suggest = Class.create();
 IncSearch.Suggest.prototype = {
   initialize: function(input, suggestArea, candidateList) {
@@ -57,43 +64,62 @@ IncSearch.Suggest.prototype = {
   interval: 500,
   dispMax: 20,
   listTagName: 'div',
-  isMatch: function(value, pattern) {
-    return (value.toLowerCase().indexOf(pattern.toLowerCase()) != -1);
-  },
-  activeDisplay: function(elm) {
-    elm.style.backgroundColor = '#3366FF';
-    elm.style.color = '#FFFFFF';
-  },
-  unactiveDisplay: function(elm) {
-    elm.style.backgroundColor = '';
-    elm.style.color = '';
-  },
-  moverDisplay: function(elm) {
-    elm.style.backgroundColor = '#99CCFF';
-    elm.style.color = '';
-  },
+  prefix: false,
+  ignoreCase: true,
+  highlight: false,
 
   setOptions: function(options) {
-    if (options.interval)
+    if (options.interval != undefined)
       this.interval = options.interval;
 
-    if (options.dispMax)
+    if (options.dispMax != undefined)
       this.dispMax = options.dispMax;
 
-    if (options.isMatch)
-      this.isMatch = options.isMatch;
-
-    if (options.activeDisplay)
-      this.activeDisplay = options.activeDisplay;
-
-    if (options.unactiveDisplay)
-      this.unactiveDisplay = options.unactiveDisplay;
-
-    if (options.moverDisplay)
-      this.moverDisplay = options.moverDisplay;
-
-    if (options.listTagName)
+    if (options.listTagName != undefined)
       this.listTagName = options.listTagName;
+
+    if (options.prefix != undefined)
+      this.prefix = options.prefix;
+
+    if (options.ignoreCase != undefined)
+      this.ignoreCase = options.ignoreCase;
+
+    if (options.highlight != undefined)
+      this.highlight = options.highlight;
+  },
+
+  activeDisplay: function(elm) {
+    elm.className = 'select';
+  },
+
+  unactiveDisplay: function(elm) {
+    elm.className = '';
+  },
+
+  moverDisplay: function(elm) {
+    elm.className = 'over';
+  },
+
+  isMatch: function(value, pattern) {
+
+    var matchPos;
+
+    if (this.ignoreCase) {
+      pos = value.toLowerCase().indexOf(pattern.toLowerCase());
+    } else {
+      pos = value.indexOf(pattern);
+    }
+
+    if ((this.prefix && (pos != 0)) ||
+        (!this.prefix && (pos == -1))) return null;
+
+    if (this.highlight) {
+      return (value.substr(0, pos) + '<strong>' 
+             + value.substr(pos, pattern.length) 
+               + '</strong>' + value.substr(pos + pattern.length));
+    } else {
+      return value;
+    }
   },
 
   checkLoop: function() {
@@ -138,11 +164,12 @@ IncSearch.Suggest.prototype = {
     var pattern = this.input.value;
 
     var resultList = new Array();
+    var temp = null; 
 
     for (var i = 0; i < this.candidateList.length; i++) {
 
-      if (this.isMatch(this.candidateList[i], pattern)) {
-        resultList.push(this.candidateList[i]);
+      if ((temp = this.isMatch(this.candidateList[i], pattern)) != null) {
+        resultList.push(temp);
 
         if (this.dispMax != 0 && resultList.length >= this.dispMax) break;
       }
@@ -226,7 +253,8 @@ IncSearch.Suggest.prototype = {
 
     this.activeDisplay(activeElement);
 
-    this.input.value = activeElement.innerHTML;
+    this.input.value = this.highlight ?
+      activeElement.innerHTML.replace(/<strong>|<\/strong>/gi, '') : activeElement.innerHTML;
     this.oldText = this.input.value;
     this.input.focus();
   },
