@@ -1,9 +1,9 @@
 /*
 --------------------------------------------------------
 suggest.js - Input Suggest
-Version 2.2 (Update 2010/09/14)
+Version 2.3 (Update 2012/07/01)
 
-Copyright (c) 2006-2010 onozaty (http://www.enjoyxstudy.com)
+Copyright (c) 2006-2012 onozaty (http://www.enjoyxstudy.com)
 
 Released under an MIT-style license.
 
@@ -50,6 +50,7 @@ Suggest.Local.prototype = {
     // reg event
     this._addEvent(this.input, 'focus', this._bind(this.checkLoop));
     this._addEvent(this.input, 'blur', this._bind(this.inputBlur));
+    this._addEvent(this.suggestArea, 'blur', this._bind(this.inputBlur));
 
     var keyevent = 'keydown';
     if (window.opera || (navigator.userAgent.indexOf('Gecko') >= 0 && navigator.userAgent.indexOf('KHTML') == -1)) {
@@ -79,13 +80,22 @@ Suggest.Local.prototype = {
 
   inputBlur: function() {
 
-    this.changeUnactive();
-    this.oldText = this.getInputText();
+    setTimeout(this._bind(function(){
 
-    if (this.timerId) clearTimeout(this.timerId);
-    this.timerId = null;
+      if (document.activeElement == this.suggestArea
+          || document.activeElement == this.input) {
+        // keep suggestion
+        return;
+      }
 
-    setTimeout(this._bind(this.clearSuggestArea), 500);
+      this.changeUnactive();
+      this.oldText = this.getInputText();
+
+      if (this.timerId) clearTimeout(this.timerId);
+      this.timerId = null;
+
+      setTimeout(this._bind(this.clearSuggestArea), 500);
+    }, 500));
   },
 
   checkLoop: function() {
@@ -316,6 +326,7 @@ Suggest.Local.prototype = {
     this.activePosition = index;
     this.changeActive(index);
 
+    this.clearSuggestArea();
     this.moveEnd();
   },
 
@@ -454,6 +465,8 @@ Suggest.LocalMulti.prototype.listClick = function(event, index) {
   this.changeActive(index);
 
   this.input.value += this.delim;
+
+  this.clearSuggestArea();
   this.moveEnd();
 };
 
