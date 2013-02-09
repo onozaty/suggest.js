@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------
 suggest.js - Input Suggest
-Version 2.0.1 (Update 2007/06/27)
+Version 2.0.2 (Update 2007/07/29)
 
 - onozaty (http://www.enjoyxstudy.com)
 
@@ -52,7 +52,10 @@ Suggest.Local.prototype = {
     this._addEvent(this.input, 'focus', this._bind(this.checkLoop));
     this._addEvent(this.input, 'blur', this._bind(this.inputBlur));
 
-    var keyevent = (window.opera) ? 'keypress' : 'keydown';
+    var keyevent = 'keydown';
+    if (window.opera || (navigator.userAgent.indexOf('Gecko') >= 0 && navigator.userAgent.indexOf('KHTML') == -1)) {
+      keyevent = 'keypress';
+    }
     this._addEvent(this.input, keyevent, this._bindEvent(this.keyEvent));
 
     // init
