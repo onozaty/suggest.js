@@ -25,6 +25,9 @@ ver 1.0 2006/02/18
   ・オプションの見直し
 ver 1.1 2006/03/02
   ・タグ補完(複数キーワード)機能を追加
+ver 1.2 2006/04/09
+  ・全候補表示のオプション追加(dispAllKey)
+  ・デリミタのオプション指定追加(delim)
 --------------------------------------------------------
 */
 
@@ -71,6 +74,7 @@ IncSearch.Suggest.prototype = {
   prefix: false,
   ignoreCase: true,
   highlight: false,
+  dispAllKey: false,
 
   setOptions: function(options) {
     if (options.interval != undefined)
@@ -90,6 +94,9 @@ IncSearch.Suggest.prototype = {
 
     if (options.highlight != undefined)
       this.highlight = options.highlight;
+
+    if (options.dispAllKey != undefined)
+      this.dispAllKey = options.dispAllKey;
   },
 
   activeDisplay: function(elm) {
@@ -138,8 +145,14 @@ IncSearch.Suggest.prototype = {
 
   // key event
   keyevent: function(event) {
-    if (event.keyCode == Event.KEY_UP ||
-        event.keyCode == Event.KEY_DOWN) {
+    if (this.dispAllKey && event.ctrlKey 
+        && this.getInputText() == ''
+        && !this.suggestList
+        && event.keyCode == Event.KEY_DOWN) {
+      // dispAll
+      this.dispAllSuggest();
+    } else if (event.keyCode == Event.KEY_UP ||
+               event.keyCode == Event.KEY_DOWN) {
       // key move
       this.moveActiveList(event.keyCode);
     } else if (event.keyCode == Event.KEY_RETURN) {
@@ -318,6 +331,21 @@ IncSearch.Suggest.prototype = {
 
   setInputText: function(text) {
     this.input.value = text;
+  },
+
+  dispAllSuggest: function() {
+
+    // init
+    this.clearSuggestArea();
+
+    this.oldText = this.getInputText();
+
+    this.suggestIndexList = new Array();
+    for (var i = 0; i < this.candidateList.length; i++) {
+      this.suggestIndexList.push(i);
+    }
+
+    this.createSuggestArea(this.candidateList);
   }
 };
 
@@ -328,10 +356,24 @@ Object.extend(Object.extend(IncSearch.SuggestTag.prototype, IncSearch.Suggest.pr
   // delimiter
   delim: ' ',
 
+  setOptions: function(options) {
+
+    (IncSearch.Suggest.prototype.setOptions).apply(this, [options]);
+
+    if (options.delim != undefined)
+      this.delim = options.delim;
+  },
+
   // key event
   keyevent: function(event) {
-    if (event.keyCode == Event.KEY_UP ||
-        event.keyCode == Event.KEY_DOWN) {
+    if (this.dispAllKey && event.ctrlKey 
+        && this.getInputText() == ''
+        && !this.suggestList
+        && event.keyCode == Event.KEY_DOWN) {
+      // dispAll
+      this.dispAllSuggest();
+    } else if (event.keyCode == Event.KEY_UP ||
+               event.keyCode == Event.KEY_DOWN) {
       // key move
       this.moveActiveList(event.keyCode);
     } else if (event.keyCode == Event.KEY_RETURN) {
