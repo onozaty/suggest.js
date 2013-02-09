@@ -1,14 +1,12 @@
 /*
 --------------------------------------------------------
 suggest.js - Input Suggest
-Version 1.4.0 (Update 2006/05/11)
+Version 2.0 (Update 2007/05/06)
 
 - onozaty (http://www.enjoyxstudy.com)
 
 Released under the Creative Commons License(Attribution 2.1 Japan):
  http://creativecommons.org/licenses/by/2.1/jp/
-
-depends on prototype.js(http://prototype.conio.net/)
 
 For details, see the web site:
  http://www.enjoyxstudy.com/javascript/suggest/
@@ -16,37 +14,46 @@ For details, see the web site:
 --------------------------------------------------------
 */
 
-if (!IncSearch) {
-  var IncSearch = {};
+if (!Suggest) {
+  var Suggest = {};
 }
+/*-- KeyCodes -----------------------------------------*/
+Suggest.Key = {
+  TAB:     9,
+  RETURN: 13,
+  ESC:    27,
+  UP:     38,
+  DOWN:   40
+};
 
-/*-- IncSearch.Suggest --------------------------------*/
-IncSearch.Suggest = Class.create();
-IncSearch.Suggest.prototype = {
+/*-- Utils --------------------------------------------*/
+Suggest.copyProperties = function(dest, src) {
+  for (var property in src) {
+    dest[property] = src[property];
+  }
+  return dest;
+};
+
+/*-- Suggest.Local ------------------------------------*/
+Suggest.Local = function() {
+  this.initialize.apply(this, arguments);
+};
+Suggest.Local.prototype = {
   initialize: function(input, suggestArea, candidateList) {
-    this.input = $(input);
-    this.suggestArea = $(suggestArea);
+
+    this.input = this._getElement(input);
+    this.suggestArea = this._getElement(suggestArea);
     this.candidateList = candidateList;
-
-    this.suggestList = null;
-    this.suggestIndexList = null;
-    this.activePosition = null;
-    this.timer = null;
-
-    this.inputValueBackup = null;
     this.oldText = this.getInputText();
 
     if (arguments[3]) this.setOptions(arguments[3]);
 
     // reg event
-    Event.observe(this.input, 'focus', this.checkLoop.bindAsEventListener(this), false);
-    Event.observe(this.input, 'blur', this.blur.bindAsEventListener(this), false);
+    this._addEvent(this.input, 'focus', this._bind(this.checkLoop));
+    this._addEvent(this.input, 'blur', this._bind(this.inputBlur));
 
-    if (window.opera) {
-      Event._observeAndCache(this.input, 'keypress', this.keyevent.bindAsEventListener(this), false);
-    } else {
-      Event.observe(this.input, 'keypress', this.keyevent.bindAsEventListener(this), false);
-    }
+    var keyevent = (window.opera) ? 'keypress' : 'keydown';
+    this._addEvent(this.input, keyevent, this._bindEvent(this.keyEvent));
 
     // init
     this.clearSuggestArea();
@@ -60,62 +67,23 @@ IncSearch.Suggest.prototype = {
   ignoreCase: true,
   highlight: false,
   dispAllKey: false,
+  classMouseOver: 'over',
+  classSelect: 'select',
+  hookBeforeSearch: function(){},
 
   setOptions: function(options) {
-    if (options.interval != undefined)
-      this.interval = options.interval;
-
-    if (options.dispMax != undefined)
-      this.dispMax = options.dispMax;
-
-    if (options.listTagName != undefined)
-      this.listTagName = options.listTagName;
-
-    if (options.prefix != undefined)
-      this.prefix = options.prefix;
-
-    if (options.ignoreCase != undefined)
-      this.ignoreCase = options.ignoreCase;
-
-    if (options.highlight != undefined)
-      this.highlight = options.highlight;
-
-    if (options.dispAllKey != undefined)
-      this.dispAllKey = options.dispAllKey;
+    Suggest.copyProperties(this, options);
   },
 
-  activeDisplay: function(elm) {
-    elm.className = 'select';
-  },
+  inputBlur: function() {
 
-  unactiveDisplay: function(elm) {
-    elm.className = '';
-  },
+    this.changeUnactive();
+    this.oldText = this.getInputText();
 
-  moverDisplay: function(elm) {
-    elm.className = 'over';
-  },
+    if (this.timerId) clearTimeout(this.timerId);
+    this.timerId = null;
 
-  isMatch: function(value, pattern) {
-
-    var matchPos;
-
-    if (this.ignoreCase) {
-      pos = value.toLowerCase().indexOf(pattern.toLowerCase());
-    } else {
-      pos = value.indexOf(pattern);
-    }
-
-    if ((this.prefix && (pos != 0)) ||
-        (!this.prefix && (pos == -1))) return null;
-
-    if (this.highlight) {
-      return (value.substr(0, pos) + '<strong>' 
-             + value.substr(pos, pattern.length) 
-               + '</strong>' + value.substr(pos + pattern.length));
-    } else {
-      return value;
-    }
+    setTimeout(this._bind(this.clearSuggestArea), 500);
   },
 
   checkLoop: function() {
@@ -124,44 +92,8 @@ IncSearch.Suggest.prototype = {
       this.oldText = text;
       this.search();
     }
-    if (this.timer) clearTimeout(this.timer);
-    this.timer = setTimeout(this.checkLoop.bind(this), this.interval);
-  },
-
-  // key event
-  keyevent: function(event) {
-
-    if (!this.timer) {
-      this.timer = setTimeout(this.checkLoop.bind(this), this.interval);
-    }
-
-    if (this.dispAllKey && event.ctrlKey 
-        && this.getInputText() == ''
-        && !this.suggestList
-        && event.keyCode == Event.KEY_DOWN) {
-      // dispAll
-      Event.stop(event);
-      this.dispAllSuggest();
-    } else if (event.keyCode == Event.KEY_UP ||
-               event.keyCode == Event.KEY_DOWN) {
-      // key move
-      Event.stop(event);
-      this.moveActiveList(event.keyCode);
-    } else if (event.keyCode == Event.KEY_RETURN) {
-      // fix
-      if (this.suggestList) {
-        Event.stop(event);
-        this.clearSuggestArea();
-      }
-    } else if (event.keyCode == Event.KEY_ESC) {
-      // cancel
-      if (this.suggestList) {
-        Event.stop(event);
-        this.clearSuggestArea();
-        this.input.value = this.inputValueBackup;
-        this.oldText = this.getInputText();
-      }
-    }
+    if (this.timerId) clearTimeout(this.timerId);
+    this.timerId = setTimeout(this._bind(this.checkLoop), this.interval);
   },
 
   search: function() {
@@ -170,15 +102,21 @@ IncSearch.Suggest.prototype = {
     this.clearSuggestArea();
 
     var text = this.getInputText();
-    if (text == '') return;
 
-    var resultList = new Array();
-    var temp = null; 
+    if (text == '' || text == null) return;
 
-    this.suggestIndexList = new Array();
+    this.hookBeforeSearch(text);
+    var resultList = this._search(text);
+    if (resultList != 0) this.createSuggestArea(resultList);
+  },
 
-    for (var i = 0; i < this.candidateList.length; i++) {
+  _search: function(text) {
 
+    var resultList = [];
+    var temp; 
+    this.suggestIndexList = [];
+
+    for (var i = 0, length = this.candidateList.length; i < length; i++) {
       if ((temp = this.isMatch(this.candidateList[i], text)) != null) {
         resultList.push(temp);
         this.suggestIndexList.push(i);
@@ -186,9 +124,23 @@ IncSearch.Suggest.prototype = {
         if (this.dispMax != 0 && resultList.length >= this.dispMax) break;
       }
     }
+    return resultList;
+  },
 
-    if (resultList != 0){
-      this.createSuggestArea(resultList);
+  isMatch: function(value, pattern) {
+
+    var pos = (this.ignoreCase) ?
+      value.toLowerCase().indexOf(pattern.toLowerCase())
+      : value.indexOf(pattern);
+
+    if ((pos == -1) || (this.prefix && pos != 0)) return null;
+
+    if (this.highlight) {
+      return (this._escapeHTML(value.substr(0, pos)) + '<strong>' 
+             + this._escapeHTML(value.substr(pos, pattern.length)) 
+               + '</strong>' + this._escapeHTML(value.substr(pos + pattern.length)));
+    } else {
+      return this._escapeHTML(value);
     }
   },
 
@@ -202,37 +154,90 @@ IncSearch.Suggest.prototype = {
 
   createSuggestArea: function(resultList) {
 
-    this.suggestList = new Array();
+    this.suggestList = [];
     this.inputValueBackup = this.input.value;
 
-    for (var i = 0; i < resultList.length; i++) {
-      var elm = document.createElement(this.listTagName);
-      elm.innerHTML = resultList[i];
-      this.suggestArea.appendChild(elm);
+    for (var i = 0, length = resultList.length; i < length; i++) {
+      var element = document.createElement(this.listTagName);
+      element.innerHTML = resultList[i];
+      this.suggestArea.appendChild(element);
 
-      Event.observe(elm, 'click',
-        new Function('event', 'this.listClick(event, ' + i + ');').bindAsEventListener(this), false);
-      Event.observe(elm, 'mouseover',
-        new Function('event', 'this.listOver(event, ' + i + ');').bindAsEventListener(this), false);
-      Event.observe(elm, 'mouseout',
-        new Function('event', 'this.listOut(event, ' + i + ');').bindAsEventListener(this), false);
+      this._addEvent(element, 'click', this._bindEvent(this.listClick, i));
+      this._addEvent(element, 'mouseover', this._bindEvent(this.listMouseOver, i));
+      this._addEvent(element, 'mouseout', this._bindEvent(this.listMouseOut, i));
 
-      this.suggestList.push(elm);
+      this.suggestList.push(element);
     }
 
-    this.suggestArea.style.display = 'block';
+    this.suggestArea.style.display = '';
   },
 
-  moveActiveList: function(keyCode) {
+  getInputText: function() {
+    return this.input.value;
+  },
 
-    if (!this.suggestList ||
-        this.suggestList.length == 0){
-      return;
+  setInputText: function(text) {
+    this.input.value = text;
+  },
+
+  // key event
+  keyEvent: function(event) {
+
+    if (!this.timerId) {
+      this.timerId = setTimeout(this._bind(this.checkLoop), this.interval);
     }
 
-    this.unactive();
+    if (this.dispAllKey && event.ctrlKey 
+        && this.getInputText() == ''
+        && !this.suggestList
+        && event.keyCode == Suggest.Key.DOWN) {
+      // dispAll
+      this._stopEvent(event);
+      this.keyEventDispAll();
+    } else if (event.keyCode == Suggest.Key.UP ||
+               event.keyCode == Suggest.Key.DOWN) {
+      // key move
+      if (this.suggestList && this.suggestList.length != 0) {
+        this._stopEvent(event);
+        this.keyEventMove(event.keyCode);
+      }
+    } else if (event.keyCode == Suggest.Key.RETURN) {
+      // fix
+      if (this.suggestList && this.suggestList.length != 0) {
+        this._stopEvent(event);
+        this.keyEventReturn();
+      }
+    } else if (event.keyCode == Suggest.Key.ESC) {
+      // cancel
+      if (this.suggestList && this.suggestList.length != 0) {
+        this._stopEvent(event);
+        this.keyEventEsc();
+      }
+    } else {
+      this.keyEventOther(event);
+    }
+  },
 
-    if (keyCode == Event.KEY_UP) {
+  keyEventDispAll: function() {
+
+    // init
+    this.clearSuggestArea();
+
+    this.oldText = this.getInputText();
+
+    this.suggestIndexList = [];
+    for (var i = 0, length = this.candidateList.length; i < length; i++) {
+      this.suggestIndexList.push(i);
+    }
+
+    this.createSuggestArea(this.candidateList);
+  },
+
+  keyEventMove: function(keyCode) {
+
+    this.changeUnactive();
+
+    if (keyCode == Suggest.Key.UP) {
       // up
       if (this.activePosition == null) {
         this.activePosition = this.suggestList.length -1;
@@ -259,12 +264,29 @@ IncSearch.Suggest.prototype = {
       }
     }
 
-    this.active(this.activePosition);
+    this.changeActive(this.activePosition);
   },
 
-  active: function(index) {
+  keyEventReturn: function() {
 
-    this.activeDisplay(this.suggestList[index]);
+    this.clearSuggestArea();
+    this.moveEnd();
+  },
+
+  keyEventEsc: function() {
+
+    this.clearSuggestArea();
+    this.input.value = this.inputValueBackup;
+    this.oldText = this.getInputText();
+
+    if (window.opera) setTimeout(this._bind(this.moveEnd), 5);
+  },
+
+  keyEventOther: function(event) {},
+
+  changeActive: function(index) {
+
+    this.setStyleActive(this.suggestList[index]);
 
     this.setInputText(this.candidateList[this.suggestIndexList[index]]);
 
@@ -272,177 +294,51 @@ IncSearch.Suggest.prototype = {
     this.input.focus();
   },
 
-  unactive: function() {
+  changeUnactive: function() {
 
     if (this.suggestList != null 
         && this.suggestList.length > 0
         && this.activePosition != null) {
-      this.unactiveDisplay(this.suggestList[this.activePosition]);
-    }
-  },
-
-  blur: function(event) {
-
-    this.unactive();
-    this.oldText = this.getInputText();
-
-    if (this.timer) clearTimeout(this.timer);
-    this.timer = null;
-
-    setTimeout((function(){ this.clearSuggestArea(); }).bind(this), 500);
-  },
-
-  listClick: function(event, index) {
-
-    this.unactive();
-    this.activePosition = index;
-    this.active(index);
-  },
-
-  listOver: function(event, index) {
-    var elm = Event.element(event);
-    this.moverDisplay(elm);
-  },
-
-  listOut: function(event, index) {
-
-    var elm = Event.element(event);
-
-    if (!this.suggestList) return;
-
-    if (index == this.activePosition) {
-      this.activeDisplay(elm);
-    }else{
-      this.unactiveDisplay(elm);
-    }
-  },
-
-  getInputText: function() {
-    return this.input.value;
-  },
-
-  setInputText: function(text) {
-    this.input.value = text;
-  },
-
-  dispAllSuggest: function() {
-
-    // init
-    this.clearSuggestArea();
-
-    this.oldText = this.getInputText();
-
-    this.suggestIndexList = new Array();
-    for (var i = 0; i < this.candidateList.length; i++) {
-      this.suggestIndexList.push(i);
-    }
-
-    this.createSuggestArea(this.candidateList);
-  }
-};
-
-/*-- IncSearch.SuggestTag --------------------------------*/
-IncSearch.SuggestTag = Class.create();
-Object.extend(Object.extend(IncSearch.SuggestTag.prototype, IncSearch.Suggest.prototype), {
-
-  // delimiter
-  delim: ' ',
-
-  setOptions: function(options) {
-
-    (IncSearch.Suggest.prototype.setOptions).apply(this, [options]);
-
-    if (options.delim != undefined)
-      this.delim = options.delim;
-  },
-
-  // key event
-  keyevent: function(event) {
-
-    if (!this.timer) {
-      this.timer = setTimeout(this.checkLoop.bind(this), this.interval);
-    }
-
-    if (this.dispAllKey && event.ctrlKey 
-        && this.getInputText() == ''
-        && !this.suggestList
-        && event.keyCode == Event.KEY_DOWN) {
-      // dispAll
-      Event.stop(event);
-      this.dispAllSuggest();
-    } else if (event.keyCode == Event.KEY_UP ||
-               event.keyCode == Event.KEY_DOWN) {
-      // key move
-      Event.stop(event);
-      this.moveActiveList(event.keyCode);
-    } else if (event.keyCode == Event.KEY_RETURN) {
-      // fix
-      if (this.suggestList) {
-        Event.stop(event);
-        this.clearSuggestArea();
-
-        this.input.value += this.delim;
-        this.moveEnd();
-      }
-    } else if (event.keyCode == Event.KEY_TAB) {
-      // fix
-      if (this.suggestList) {
-        Event.stop(event);
-
-        if (!this.activePosition) {
-          this.activePosition = 0;
-          this.active(this.activePosition);
-        }
-
-        this.clearSuggestArea();
-        this.input.value += this.delim;
-        setTimeout(this.moveEnd.bind(this),5); // Opera
-      }
-    } else if (event.keyCode == Event.KEY_ESC) {
-      // cancel
-      if (this.suggestList) {
-        Event.stop(event);
-        this.clearSuggestArea();
-        this.input.value = this.inputValueBackup;
-        this.oldText = this.getInputText();
-      }
+      this.setStyleUnactive(this.suggestList[this.activePosition]);
     }
   },
 
   listClick: function(event, index) {
 
-    this.unactive();
+    this.changeUnactive();
     this.activePosition = index;
-    this.active(index);
+    this.changeActive(index);
 
-    this.input.value += this.delim;
     this.moveEnd();
   },
 
-  getInputText: function() {
+  listMouseOver: function(event, index) {
+    this.setStyleMouseOver(this._getEventElement(event));
+  },
 
-    var pos = this.getLastTokenPos();
+  listMouseOut: function(event, index) {
 
-    if (pos == -1) {
-      return this.input.value;
-    } else {
-      return this.input.value.substr(pos + 1);
+    if (!this.suggestList) return;
+
+    var element = this._getEventElement(event);
+
+    if (index == this.activePosition) {
+      this.setStyleActive(element);
+    }else{
+      this.setStyleUnactive(element);
     }
   },
 
-  setInputText: function(text) {
-
-    var pos = this.getLastTokenPos();
-
-    if (pos == -1) {
-      this.input.value = text;
-    } else {
-      this.input.value = this.input.value.substr(0 , pos + 1) + text;
-    }
+  setStyleActive: function(element) {
+    element.className = this.classSelect;
   },
 
-  getLastTokenPos: function() {
-    return this.input.value.lastIndexOf(this.delim);
+  setStyleUnactive: function(element) {
+    element.className = '';
+  },
+
+  setStyleMouseOver: function(element) {
+    element.className = this.classMouseOver;
   },
 
   moveEnd: function() {
@@ -455,5 +351,118 @@ Object.extend(Object.extend(IncSearch.SuggestTag.prototype, IncSearch.Suggest.pr
     } else if (this.input.setSelectionRange) {
       this.input.setSelectionRange(this.input.value.length, this.input.value.length);
     }
+  },
+
+  // Utils
+  _getElement: function(element) {
+    return (typeof element == 'string') ? document.getElementById(element) : element;
+  },
+  _addEvent: (window.addEventListener ?
+    function(element, type, func) {
+      element.addEventListener(type, func, false);
+    } :
+    function(element, type, func) {
+      element.attachEvent('on' + type, func);
+    }),
+  _stopEvent: function(event) {
+    if (event.preventDefault) {
+      event.preventDefault();
+      event.stopPropagation();
+    } else {
+      event.returnValue = false;
+      event.cancelBubble = true;
+    }
+  },
+  _getEventElement: function(event) {
+    return event.target || event.srcElement;
+  },
+  _bind: function(func) {
+    var self = this;
+    var args = Array.prototype.slice.call(arguments, 1);
+    return function(){ func.apply(self, args); };
+  },
+  _bindEvent: function(func) {
+    var self = this;
+    var args = Array.prototype.slice.call(arguments, 1);
+    return function(event){ event = event || window.event; func.apply(self, [event].concat(args)); };
+  },
+  _escapeHTML: function(value) {
+    return value.replace(/\&/g, '&amp;').replace( /</g, '&lt;').replace(/>/g, '&gt;')
+             .replace(/\"/g, '&quot;').replace(/\'/g, '&#39;');
   }
-});
+};
+
+/*-- Suggest.LocalMulti ---------------------------------*/
+Suggest.LocalMulti = function() {
+  this.initialize.apply(this, arguments);
+};
+Suggest.copyProperties(Suggest.LocalMulti.prototype, Suggest.Local.prototype);
+
+Suggest.LocalMulti.prototype.delim = ' '; // delimiter
+
+Suggest.LocalMulti.prototype.keyEventReturn = function() {
+
+  this.clearSuggestArea();
+  this.input.value += this.delim;
+  this.moveEnd();
+};
+
+Suggest.LocalMulti.prototype.keyEventOther = function(event) {
+
+  if (event.keyCode == Suggest.Key.TAB) {
+    // fix
+    if (this.suggestList && this.suggestList.length != 0) {
+      this._stopEvent(event);
+
+      if (!this.activePosition) {
+        this.activePosition = 0;
+        this.changeActive(this.activePosition);
+      }
+
+      this.clearSuggestArea();
+      this.input.value += this.delim;
+      if (window.opera) {
+        setTimeout(this._bind(this.moveEnd), 5);
+      } else {
+        this.moveEnd();
+      }
+    }
+  }
+};
+
+Suggest.LocalMulti.prototype.listClick = function(event, index) {
+
+  this.changeUnactive();
+  this.activePosition = index;
+  this.changeActive(index);
+
+  this.input.value += this.delim;
+  this.moveEnd();
+};
+
+Suggest.LocalMulti.prototype.getInputText = function() {
+
+  var pos = this.getLastTokenPos();
+
+  if (pos == -1) {
+    return this.input.value;
+  } else {
+    return this.input.value.substr(pos + 1);
+  }
+};
+
+Suggest.LocalMulti.prototype.setInputText = function(text) {
+
+  var pos = this.getLastTokenPos();
+
+  if (pos == -1) {
+    this.input.value = text;
+  } else {
+    this.input.value = this.input.value.substr(0 , pos + 1) + text;
+  }
+};
+
+Suggest.LocalMulti.prototype.getLastTokenPos = function() {
+  return this.input.value.lastIndexOf(this.delim);
+};
+
