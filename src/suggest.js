@@ -28,6 +28,8 @@ ver 1.1 2006/03/02
 ver 1.2 2006/04/09
   ・全候補表示のオプション追加(dispAllKey)
   ・デリミタのオプション指定追加(delim)
+ver 1.3 2006/05/06
+  ・Safariにて補完候補の選択が出来ない問題対処
 --------------------------------------------------------
 */
 
@@ -150,10 +152,12 @@ IncSearch.Suggest.prototype = {
         && !this.suggestList
         && event.keyCode == Event.KEY_DOWN) {
       // dispAll
+      Event.stop(event);
       this.dispAllSuggest();
     } else if (event.keyCode == Event.KEY_UP ||
                event.keyCode == Event.KEY_DOWN) {
       // key move
+      Event.stop(event);
       this.moveActiveList(event.keyCode);
     } else if (event.keyCode == Event.KEY_RETURN) {
       // fix
@@ -371,10 +375,12 @@ Object.extend(Object.extend(IncSearch.SuggestTag.prototype, IncSearch.Suggest.pr
         && !this.suggestList
         && event.keyCode == Event.KEY_DOWN) {
       // dispAll
+      Event.stop(event);
       this.dispAllSuggest();
     } else if (event.keyCode == Event.KEY_UP ||
                event.keyCode == Event.KEY_DOWN) {
       // key move
+      Event.stop(event);
       this.moveActiveList(event.keyCode);
     } else if (event.keyCode == Event.KEY_RETURN) {
       // fix
@@ -388,6 +394,8 @@ Object.extend(Object.extend(IncSearch.SuggestTag.prototype, IncSearch.Suggest.pr
     } else if (event.keyCode == Event.KEY_TAB) {
       // fix
       if (this.suggestList) {
+        Event.stop(event);
+
         if (!this.activePosition) {
           this.activePosition = 0;
           this.active(this.activePosition);
@@ -396,8 +404,6 @@ Object.extend(Object.extend(IncSearch.SuggestTag.prototype, IncSearch.Suggest.pr
         this.clearSuggestArea();
         this.input.value += this.delim;
         setTimeout(this.moveEnd.bind(this),5); // Opera
-
-        Event.stop(event);
       }
     } else if (event.keyCode == Event.KEY_ESC) {
       // cancel
