@@ -1,35 +1,18 @@
 /*
 --------------------------------------------------------
 suggest.js - Input Suggest
-入力補完ライブラリ
+Version 1.4.0 (Update 2006/05/11)
 
 - onozaty (http://www.enjoyxstudy.com)
 
 Released under the Creative Commons License(Attribution 2.1 Japan):
-クリエイティブ・コモンズの帰属 2.1 Japanライセンスの下でライセンスされています。
  http://creativecommons.org/licenses/by/2.1/jp/
 
 depends on prototype.js(http://prototype.conio.net/)
-本ライブラリの使用にあたっては、prototype.jsが必要です。
 
 For details, see the web site:
-使用方法については、下記を参照してください。
- http://www.enjoyxstudy.com/javascript/suggest
+ http://www.enjoyxstudy.com/javascript/suggest/
 
---------------------------------------------------------
-ver 0.1 2006/01/15
-  ・公開
-ver 0.2 2006/02/05
-  ・機能改善
-ver 1.0 2006/02/18
-  ・オプションの見直し
-ver 1.1 2006/03/02
-  ・タグ補完(複数キーワード)機能を追加
-ver 1.2 2006/04/09
-  ・全候補表示のオプション追加(dispAllKey)
-  ・デリミタのオプション指定追加(delim)
-ver 1.3 2006/05/06
-  ・Safariにて補完候補の選択が出来ない問題対処
 --------------------------------------------------------
 */
 
@@ -147,6 +130,11 @@ IncSearch.Suggest.prototype = {
 
   // key event
   keyevent: function(event) {
+
+    if (!this.timer) {
+      this.timer = setTimeout(this.checkLoop.bind(this), this.interval);
+    }
+
     if (this.dispAllKey && event.ctrlKey 
         && this.getInputText() == ''
         && !this.suggestList
@@ -370,6 +358,11 @@ Object.extend(Object.extend(IncSearch.SuggestTag.prototype, IncSearch.Suggest.pr
 
   // key event
   keyevent: function(event) {
+
+    if (!this.timer) {
+      this.timer = setTimeout(this.checkLoop.bind(this), this.interval);
+    }
+
     if (this.dispAllKey && event.ctrlKey 
         && this.getInputText() == ''
         && !this.suggestList
