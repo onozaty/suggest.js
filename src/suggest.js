@@ -1,9 +1,9 @@
 /*
 --------------------------------------------------------
 suggest.js - Input Suggest
-Version 2.3 (Update 2012/07/01)
+Version 2.3 (Update 2013/02/11)
 
-Copyright (c) 2006-2012 onozaty (http://www.enjoyxstudy.com)
+Copyright (c) 2006-2013 onozaty (http://www.enjoyxstudy.com)
 
 Released under an MIT-style license.
 
@@ -52,11 +52,7 @@ Suggest.Local.prototype = {
     this._addEvent(this.input, 'blur', this._bind(this.inputBlur));
     this._addEvent(this.suggestArea, 'blur', this._bind(this.inputBlur));
 
-    var keyevent = 'keydown';
-    if (window.opera || (navigator.userAgent.indexOf('Gecko') >= 0 && navigator.userAgent.indexOf('KHTML') == -1)) {
-      keyevent = 'keypress';
-    }
-    this._addEvent(this.input, keyevent, this._bindEvent(this.keyEvent));
+    this._addEvent(this.input, 'keydown', this._bindEvent(this.keyEvent));
 
     // init
     this.clearSuggestArea();
