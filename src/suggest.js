@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------
 suggest.js - Input Suggest
-Version 2.3 (Update 2013/02/11)
+Version 2.3.1 (Update 2013/02/11)
 
 Copyright (c) 2006-2013 onozaty (http://www.enjoyxstudy.com)
 
