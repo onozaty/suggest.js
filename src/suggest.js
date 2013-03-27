@@ -98,18 +98,16 @@ Suggest.Local.prototype = {
     var text = this.getInputText();
     if (text != this.oldText) {
       this.oldText = text;
-      this.search();
+      this.search(text);
     }
     if (this.timerId) clearTimeout(this.timerId);
     this.timerId = setTimeout(this._bind(this.checkLoop), this.interval);
   },
 
-  search: function() {
+  search: function(text) {
 
     // init
     this.clearSuggestArea();
-
-    var text = this.getInputText();
 
     if (text == '' || text == null) return;
 
