@@ -492,3 +492,12 @@ Suggest.LocalMulti.prototype.getLastTokenPos = function() {
   return this.input.value.lastIndexOf(this.delim);
 };
 
+if(typeof define === 'function' && define.amd) {
+  define('Suggest', function () {
+    return Suggest;
+  });
+} else if (typeof module !== 'undefined' && module.exports) {
+  module.exports = Suggest;
+} else {
+  window.Suggest = Suggest;
+}
