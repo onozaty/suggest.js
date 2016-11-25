@@ -39,7 +39,7 @@ Suggest.copyProperties = function(dest, src) {
  */
 Suggest.Local = function() {
   var instance = Object.create(this);
-  instance.initialize.apply(this, arguments);
+  instance.initialize.apply(instance, arguments);
   return instance;
 };
 Suggest.Local.prototype = {
