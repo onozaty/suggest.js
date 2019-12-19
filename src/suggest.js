@@ -69,6 +69,17 @@ Suggest.Local.prototype = {
   classMouseOver: 'over',
   classSelect: 'select',
   hookBeforeSearch: function(){},
+  hookAfterMoveEnd: function(text){},
+  textifyCandidateListValue: function(value){return value},
+
+  textifyCandidateList: function(){
+    var resultList = [];
+
+    for (var i = 0, length = this.candidateList.length; i < length; i++) {
+      resultList.push(this.textifyCandidateListValue(this.candidateList[i]));
+    }
+    return resultList;
+  },
 
   setOptions: function(options) {
     Suggest.copyProperties(this, options);
@@ -125,7 +136,7 @@ Suggest.Local.prototype = {
     this.suggestIndexList = [];
 
     for (var i = 0, length = this.candidateList.length; i < length; i++) {
-      if ((temp = this.isMatch(this.candidateList[i], text)) != null) {
+      if ((temp = this.isMatch(this.textifyCandidateListValue(this.candidateList[i]), text)) != null) {
         resultList.push(temp);
         this.suggestIndexList.push(i);
 
@@ -241,7 +252,8 @@ Suggest.Local.prototype = {
       this.suggestIndexList.push(i);
     }
 
-    this.createSuggestArea(this.candidateList);
+    var resultList = this.textifyCandidateList();
+    this.createSuggestArea(resultList);
   },
 
   keyEventMove: function(keyCode) {
@@ -301,7 +313,7 @@ Suggest.Local.prototype = {
 
     this.setStyleActive(this.suggestList[index]);
 
-    this.setInputText(this.candidateList[this.suggestIndexList[index]]);
+    this.setInputText(this.textifyCandidateListValue(this.candidateList[this.suggestIndexList[index]]));
 
     this.oldText = this.getInputText();
     this.input.focus();
@@ -375,6 +387,7 @@ Suggest.Local.prototype = {
     } else if (this.input.setSelectionRange) {
       this.input.setSelectionRange(this.input.value.length, this.input.value.length);
     }
+    this.hookAfterMoveEnd(this.input.value);
   },
 
   // Utils
