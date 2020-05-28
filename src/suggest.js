@@ -146,9 +146,9 @@ Suggest.Local.prototype = {
     if ((pos == -1) || (this.prefix && pos != 0)) return null;
 
     if (this.highlight) {
-      return (this._escapeHTML(value.substr(0, pos)) + '<strong>' 
+      return (this._escapeHTML(value.substr(0, pos)) + '<span class="highlight">' 
              + this._escapeHTML(value.substr(pos, pattern.length)) 
-               + '</strong>' + this._escapeHTML(value.substr(pos + pattern.length)));
+               + '</span>' + this._escapeHTML(value.substr(pos + pattern.length)));
     } else {
       return this._escapeHTML(value);
     }
