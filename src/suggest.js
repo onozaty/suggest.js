@@ -34,8 +34,13 @@ Suggest.copyProperties = function(dest, src) {
 };
 
 /*-- Suggest.Local ------------------------------------*/
+/**
+ * Creates and returns an instance of Suggest.Local 
+ */
 Suggest.Local = function() {
-  this.initialize.apply(this, arguments);
+  var instance = Object.create(this);
+  instance.initialize.apply(instance, arguments);
+  return instance;
 };
 Suggest.Local.prototype = {
   initialize: function(input, suggestArea, candidateList) {
@@ -69,6 +74,18 @@ Suggest.Local.prototype = {
   classMouseOver: 'over',
   classSelect: 'select',
   hookBeforeSearch: function(){},
+
+  /**
+   * Updates the list of suggestions
+   * params
+   * suggestions:array
+   */
+  changeSuggestions: function (suggestions) {
+    if (typeof suggestions != 'undefined' && suggestions.length != 'undefined')
+      throw('Suggest options needs to be an array');
+    else 
+      this.candidateList = suggestions;
+  },
 
   setOptions: function(options) {
     Suggest.copyProperties(this, options);
