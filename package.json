@@ -1,0 +1,27 @@
+{
+  "name": "suggest.js",
+  "version": "2.3.1",
+  "description": "Input Suggest Library",
+  "main": "src/suggest.js",
+  "type": "module",
+  "scripts": {
+    "format": "prettier --write src/** test/**",
+    "test": "vitest run",
+    "test:watch": "vitest --watch"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/user-event": "^14.6.1",
+    "jsdom": "^26.1.0",
+    "prettier": "^3.5.3",
+    "vitest": "^3.2.3"
+  },
+  "keywords": [
+    "suggest",
+    "autocomplete",
+    "input",
+    "javascript"
+  ],
+  "author": "onozaty",
+  "license": "MIT"
+}
