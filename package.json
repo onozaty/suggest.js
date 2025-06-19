@@ -1,6 +1,6 @@
 {
-  "name": "suggest.js",
-  "version": "2.3.1",
+  "name": "@onozaty/suggest",
+  "version": "3.0.0-beta.1",
   "description": "Input Suggest Library",
   "main": "./dist/suggest.js",
   "module": "./dist/suggest.mjs",
@@ -18,11 +18,10 @@
   ],
   "scripts": {
     "build": "tsup",
-    "dev": "tsup --watch",
     "format": "prettier --write src/**/*.ts test/**/*.ts *.ts",
     "test": "vitest run",
-    "test:watch": "vitest --watch",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm build"
   },
   "repository": {
     "type": "git",

@@ -1,5 +1,218 @@
-suggest.js
-==========
-suggest.js - Input Suggest Library
+# suggest.js
 
-http://www.enjoyxstudy.com/javascript/suggest/index.en.html
+A simple input suggestion library that provides autocomplete functionality for web applications.
+
+## Features
+
+- 🚀 **Client-side search** - No server requests needed during typing
+- 🎯 **Flexible matching** - Prefix or partial text matching
+- ⌨️ **Keyboard navigation** - Arrow keys, Enter, Escape, and Tab support
+- 🖱️ **Mouse interaction** - Click and hover support
+- 🎨 **Customizable styling** - CSS classes for different states
+- 🔤 **Case options** - Case-sensitive or insensitive search
+- ✨ **Text highlighting** - Highlight matching portions
+- 🏷️ **Multi-token support** - Handle multiple values with delimiters
+- 📦 **Zero dependencies** - No external libraries required
+
+## Installation
+
+### Package Manager
+
+```bash
+npm install @onozaty/suggest
+# or
+yarn add @onozaty/suggest
+# or
+pnpm add @onozaty/suggest
+```
+
+### CDN
+
+```html
+<!-- IIFE version (creates global Suggest object) -->
+<script src="https://unpkg.com/@onozaty/suggest@latest/dist/suggest.js"></script>
+
+<!-- ES Module -->
+<script type="module">
+  import { Suggest } from 'https://unpkg.com/@onozaty/suggest@latest/dist/suggest.mjs';
+</script>
+```
+
+## Basic Usage
+
+### HTML Setup
+
+```html
+<input id="searchInput" type="text" autocomplete="off" placeholder="Start typing...">
+<div id="suggestions" style="display: none; border: 1px solid #ccc; max-height: 200px; overflow-y: auto;"></div>
+```
+
+### JavaScript/TypeScript (with bundler)
+
+```typescript
+import { Suggest } from '@onozaty/suggest';
+
+// Sample data
+const countries = [
+  'United States',
+  'United Kingdom', 
+  'Japan',
+  'Germany',
+  'France',
+  'Canada',
+  'Australia'
+];
+
+// Basic usage
+new Suggest.Local('searchInput', 'suggestions', countries);
+
+// With options
+new Suggest.Local('searchInput', 'suggestions', countries, {
+  dispMax: 10,           // Maximum suggestions to display
+  interval: 300,         // Search delay in milliseconds
+  prefix: false,         // Allow partial matching (not just prefix)
+  ignoreCase: true,      // Case-insensitive search
+  highlight: true,       // Highlight matching text
+  dispAllKey: true,      // Allow Ctrl+Down to show all suggestions
+  classMouseOver: 'hover', // CSS class for mouse hover
+  classSelect: 'selected'  // CSS class for keyboard selection
+});
+```
+
+### CDN Usage
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Suggest.js CDN Example</title>
+</head>
+<body>
+  <input id="searchInput" type="text" autocomplete="off" placeholder="Start typing...">
+  <div id="suggestions" style="display: none; border: 1px solid #ccc; max-height: 200px; overflow-y: auto;"></div>
+
+  <script src="https://unpkg.com/@onozaty/suggest@latest/dist/suggest.js"></script>
+  <script>
+    const countries = [
+      'United States',
+      'United Kingdom', 
+      'Japan',
+      'Germany',
+      'France',
+      'Canada',
+      'Australia'
+    ];
+
+    // Global Suggest object is available
+    new Suggest.Local('searchInput', 'suggestions', countries, {
+      dispMax: 10,
+      highlight: true
+    });
+  </script>
+</body>
+</html>
+```
+
+### Multi-token Input
+
+For inputs that accept multiple values separated by delimiters:
+
+```typescript
+import { Suggest } from '@onozaty/suggest';
+
+const tags = ['javascript', 'typescript', 'react', 'vue', 'angular', 'node.js'];
+
+new Suggest.LocalMulti('tagsInput', 'tagSuggestions', tags, {
+  delim: ', ',           // Delimiter between values
+  dispMax: 5,
+  highlight: true
+});
+```
+
+## Configuration Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `interval` | number | 500 | Search delay in milliseconds |
+| `dispMax` | number | 20 | Maximum number of suggestions to display |
+| `listTagName` | string | 'div' | HTML tag for suggestion items |
+| `prefix` | boolean | false | Only match from the beginning of strings |
+| `ignoreCase` | boolean | true | Case-insensitive search |
+| `highlight` | boolean | false | Highlight matching text with `<strong>` tags |
+| `dispAllKey` | boolean | false | Enable Ctrl+Down to show all suggestions |
+| `classMouseOver` | string | 'over' | CSS class applied on mouse hover |
+| `classSelect` | string | 'select' | CSS class applied on keyboard selection |
+| `hookBeforeSearch` | function | - | Callback function called before each search |
+
+### Multi-token Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `delim` | string | ' ' | Delimiter for separating multiple values |
+
+## Keyboard Controls
+
+- **↑/↓ Arrow Keys**: Navigate through suggestions
+- **Enter**: Select current suggestion
+- **Escape**: Cancel and restore original input
+- **Tab**: (Multi-token only) Select suggestion and add delimiter
+- **Ctrl+↓**: (If `dispAllKey: true`) Show all available suggestions
+
+## CSS Styling
+
+Style the suggestion container and items:
+
+```css
+#suggestions {
+  position: absolute;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+#suggestions div {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+#suggestions div.over {
+  background-color: #f0f0f0;
+}
+
+#suggestions div.select {
+  background-color: #007bff;
+  color: white;
+}
+
+#suggestions strong {
+  font-weight: bold;
+}
+```
+
+## TypeScript Support
+
+Full TypeScript support with exported interfaces:
+
+```typescript
+import { Suggest, SuggestOptions, SuggestMultiOptions } from '@onozaty/suggest';
+
+const options: SuggestOptions = {
+  dispMax: 10,
+  highlight: true,
+  hookBeforeSearch: (text: string) => {
+    console.log('Searching for:', text);
+  }
+};
+```
+
+## License
+
+MIT
+
+## Author
+
+[onozaty](https://github.com/onozaty)

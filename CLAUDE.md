@@ -36,14 +36,8 @@ Key architectural patterns:
 # Build the library
 pnpm build
 
-# Development mode with watch
-pnpm dev
-
 # Run tests
 pnpm test
-
-# Run tests in watch mode
-pnpm test:watch
 
 # Type checking
 pnpm typecheck
