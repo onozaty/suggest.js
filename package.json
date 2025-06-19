@@ -2,18 +2,40 @@
   "name": "suggest.js",
   "version": "2.3.1",
   "description": "Input Suggest Library",
-  "main": "src/suggest.js",
+  "main": "./dist/suggest.js",
+  "module": "./dist/suggest.mjs",
+  "types": "./dist/suggest.d.ts",
   "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/suggest.d.ts",
+      "import": "./dist/suggest.mjs",
+      "require": "./dist/suggest.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "format": "prettier --write src/** test/**",
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "format": "prettier --write src/**/*.ts test/**/*.ts *.ts",
     "test": "vitest run",
-    "test:watch": "vitest --watch"
+    "test:watch": "vitest --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/onozaty/suggest.js"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^24.0.3",
     "jsdom": "^26.1.0",
     "prettier": "^3.5.3",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3",
     "vitest": "^3.2.3"
   },
   "keywords": [

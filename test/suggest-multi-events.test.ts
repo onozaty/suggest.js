@@ -1,5 +1,3 @@
-// @ts-check
-import { describe, expect, test } from "vitest";
 import { setupSuggestLocalMulti, waitForSuggestUpdate } from "./utils";
 
 const DEFAULT_CANDIDATE_LIST = [
