@@ -43,8 +43,31 @@ pnpm add @onozaty/suggest
 ### HTML Setup
 
 ```html
+<style>
+  .suggestions {
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    width: 200px;
+    z-index: 1;
+  }
+
+  .suggestions div {
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .suggestions div.over {
+    background-color: #f0f0f0;
+  }
+
+  .suggestions div.select {
+    background-color: #e3f2fd;
+  }
+</style>
+
 <input id="searchInput" type="text" autocomplete="off" placeholder="Start typing...">
-<div id="suggestions" style="display: none; border: 1px solid #ccc; max-height: 200px; overflow-y: auto;"></div>
+<div id="suggestions" class="suggestions"></div>
 ```
 
 ### JavaScript/TypeScript (with bundler)
@@ -86,10 +109,32 @@ new Suggest.Local('searchInput', 'suggestions', countries, {
 <html>
 <head>
   <title>Suggest.js CDN Example</title>
+  <style>
+  .suggestions {
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    width: 200px;
+    z-index: 1;
+  }
+
+  .suggestions div {
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .suggestions div.over {
+    background-color: #f0f0f0;
+  }
+
+  .suggestions div.select {
+    background-color: #e3f2fd;
+  }
+  </style>
 </head>
 <body>
   <input id="searchInput" type="text" autocomplete="off" placeholder="Start typing...">
-  <div id="suggestions" style="display: none; border: 1px solid #ccc; max-height: 200px; overflow-y: auto;"></div>
+  <div id="suggestions" class="suggestions"></div>
 
   <script src="https://unpkg.com/@onozaty/suggest@latest/dist/suggest.js"></script>
   <script>
@@ -158,41 +203,6 @@ new Suggest.LocalMulti('tagsInput', 'tagSuggestions', tags, {
 - **Tab**: (Multi-token only) Select suggestion and add delimiter
 - **Ctrl+↓**: (If `dispAllKey: true`) Show all available suggestions
 
-## CSS Styling
-
-Style the suggestion container and items:
-
-```css
-#suggestions {
-  position: absolute;
-  background: white;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  max-height: 200px;
-  overflow-y: auto;
-  z-index: 1000;
-}
-
-#suggestions div {
-  padding: 8px 12px;
-  cursor: pointer;
-}
-
-#suggestions div.over {
-  background-color: #f0f0f0;
-}
-
-#suggestions div.select {
-  background-color: #007bff;
-  color: white;
-}
-
-#suggestions strong {
-  font-weight: bold;
-}
-```
-
 ## TypeScript Support
 
 Full TypeScript support with exported interfaces:
@@ -208,6 +218,12 @@ const options: SuggestOptions = {
   }
 };
 ```
+
+## Demo
+
+[**View Live Demo**](https://onozaty.github.io/suggest.js/) 
+
+Interactive demo page to see the library in action.
 
 ## License
 
