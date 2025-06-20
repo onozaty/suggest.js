@@ -462,7 +462,7 @@ class SuggestLocalMulti extends SuggestLocal {
     if (pos === -1) {
       return this.input.value;
     } else {
-      return this.input.value.substring(pos + 1);
+      return this.input.value.substring(pos + this.delim.length);
     }
   }
 
@@ -472,7 +472,7 @@ class SuggestLocalMulti extends SuggestLocal {
     if (pos === -1) {
       this.input.value = text;
     } else {
-      this.input.value = this.input.value.substring(0, pos + 1) + text;
+      this.input.value = this.input.value.substring(0, pos + this.delim.length) + text;
     }
   }
 
