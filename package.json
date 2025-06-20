@@ -1,8 +1,8 @@
 {
   "name": "@onozaty/suggest",
-  "version": "3.0.0-beta.1",
+  "version": "3.0.0-beta.6",
   "description": "Input Suggest Library",
-  "main": "./dist/suggest.js",
+  "main": "./dist/suggest.cjs",
   "module": "./dist/suggest.mjs",
   "types": "./dist/suggest.d.ts",
   "type": "module",
@@ -10,7 +10,7 @@
     ".": {
       "types": "./dist/suggest.d.ts",
       "import": "./dist/suggest.mjs",
-      "require": "./dist/suggest.js"
+      "require": "./dist/suggest.cjs"
     }
   },
   "files": [

@@ -481,11 +481,17 @@ class SuggestLocalMulti extends SuggestLocal {
   }
 }
 
-// Main Suggest namespace
+// Named exports for module usage
+export { SuggestLocal as Local, SuggestLocalMulti as LocalMulti };
+
+// Main Suggest namespace (for module compatibility)
 export const Suggest = {
   Local: SuggestLocal,
   LocalMulti: SuggestLocalMulti,
 };
 
-// Default export for compatibility
-export default Suggest;
+// Default export - directly export the namespace object
+export default {
+  Local: SuggestLocal,
+  LocalMulti: SuggestLocalMulti,
+};

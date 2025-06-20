@@ -15,6 +15,11 @@ export default defineConfig({
   outDir: "dist",
   target: "es2022",
   platform: "browser",
+  outExtension({ format }) {
+    return {
+      js: format === "iife" ? ".js" : format === "esm" ? ".mjs" : ".cjs"
+    }
+  },
   esbuildOptions(options) {
     const repositoryUrl =
       pkg.repository?.url ||
