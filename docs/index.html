@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@onozaty/suggest - Demo</title>
+    <style>
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        background-color: #f8f9fa;
+      }
+
+      .demo-section {
+        background: white;
+        padding: 30px;
+        margin: 30px 0;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        color: #333;
+        text-align: center;
+        margin-bottom: 10px;
+      }
+
+      .subtitle {
+        text-align: center;
+        color: #666;
+        margin-bottom: 40px;
+      }
+
+      .demo-input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        font-size: 16px;
+        box-sizing: border-box;
+        transition: border-color 0.2s ease;
+      }
+
+      .demo-input:focus {
+        outline: none;
+        border-color: #4285f4;
+      }
+
+      .suggestions {
+        position: absolute;
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        width: 200px;
+        z-index: 1;
+      }
+
+      .suggestions div {
+        padding: 8px 12px;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
+      .suggestions div.over {
+        background-color: #f0f0f0;
+      }
+
+      .suggestions div.select {
+        background-color: #e3f2fd;
+      }
+
+      .container {
+        position: relative;
+      }
+
+      .code-block {
+        background: #f1f3f4;
+        padding: 15px;
+        border-radius: 6px;
+        margin: 15px 0;
+        overflow-x: auto;
+      }
+
+      /* Override Prism.js default styles */
+      .code-block pre[class*="language-"] {
+        margin: 0;
+        padding: 0;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        font-family: "Monaco", "Menlo", "Consolas", monospace;
+        font-size: 14px;
+        line-height: 1.4;
+      }
+
+      .code-block code[class*="language-"] {
+        background: transparent;
+        padding: 0;
+        font-family: "Monaco", "Menlo", "Consolas", monospace;
+        font-size: 14px;
+      }
+
+      .github-link {
+        text-align: center;
+        margin-top: 40px;
+      }
+
+      .github-link a {
+        color: #4285f4;
+        text-decoration: none;
+        font-weight: 500;
+      }
+    </style>
+    <link
+      href="https://unpkg.com/prismjs@1.30.0/themes/prism.css"
+      rel="stylesheet"
+    />
+    <script src="https://unpkg.com/prismjs@1.30.0/components/prism-core.min.js"></script>
+    <script src="https://unpkg.com/prismjs@1.30.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://unpkg.com/@onozaty/suggest@latest/dist/suggest.js"></script>
+  </head>
+  <body>
+    <h1>@onozaty/suggest</h1>
+    <p class="subtitle">Simple input suggestion library demo</p>
+
+    <div class="demo-section">
+      <h2>Basic Usage</h2>
+      <p>Type a country name:</p>
+      <p>
+        <strong>Available countries:</strong> United States, United Kingdom,
+        Japan, Germany, France, Canada, Australia, South Korea, China, India,
+        Brazil, Mexico, Russia, Italy, Spain, Netherlands
+      </p>
+      <div>
+        <input
+          id="countryInput"
+          type="text"
+          class="demo-input"
+          placeholder="Start typing a country name..."
+          autocomplete="off"
+        />
+        <div id="countrySuggestions" class="suggestions"></div>
+      </div>
+      <div class="code-block">
+        <pre><code class="language-javascript">new Suggest.Local('countryInput', 'countrySuggestions', countries, {
+  highlight: true
+});</code></pre>
+      </div>
+
+      <script>
+        // Country data
+        const countries = [
+          "United States",
+          "United Kingdom",
+          "Japan",
+          "Germany",
+          "France",
+          "Canada",
+          "Australia",
+          "South Korea",
+          "China",
+          "India",
+          "Brazil",
+          "Mexico",
+          "Russia",
+          "Italy",
+          "Spain",
+          "Netherlands",
+        ];
+
+        // Basic usage
+        new Suggest.Local("countryInput", "countrySuggestions", countries, {
+          highlight: true,
+        });
+      </script>
+    </div>
+
+    <div class="demo-section">
+      <h2>Multi-token Input</h2>
+      <p>Type multiple programming languages separated by spaces:</p>
+      <p>
+        <strong>Available languages:</strong> JavaScript, TypeScript, Python,
+        Java, C++, C#, Ruby, PHP, Swift, Kotlin, Go, Rust, Scala, Perl, R,
+        MATLAB, HTML, CSS, SQL, Shell, PowerShell, Dart, Lua, Haskell
+      </p>
+      <div class="container">
+        <input
+          id="languageInput"
+          type="text"
+          class="demo-input"
+          placeholder="JavaScript Python ..."
+          autocomplete="off"
+        />
+        <div id="languageSuggestions" class="suggestions"></div>
+      </div>
+      <div class="code-block">
+        <pre><code class="language-javascript">new Suggest.LocalMulti('languageInput', 'languageSuggestions', languages);</code></pre>
+      </div>
+
+      <script>
+        // Programming language data
+        const languages = [
+          "JavaScript",
+          "TypeScript",
+          "Python",
+          "Java",
+          "C++",
+          "C#",
+          "Ruby",
+          "PHP",
+          "Swift",
+          "Kotlin",
+          "Go",
+          "Rust",
+          "Scala",
+          "Perl",
+          "R",
+          "MATLAB",
+          "HTML",
+          "CSS",
+          "SQL",
+          "Shell",
+          "PowerShell",
+          "Dart",
+          "Lua",
+          "Haskell",
+        ];
+
+        // Multi-token input
+        new Suggest.LocalMulti(
+          "languageInput",
+          "languageSuggestions",
+          languages,
+        );
+      </script>
+    </div>
+
+    <div class="demo-section">
+      <h2>Prefix Search</h2>
+      <p>Type fruit names (matches only from the beginning):</p>
+      <p>
+        <strong>Available fruits:</strong> Apple, Banana, Cherry, Date,
+        Elderberry, Fig, Grape, Honeydew, Kiwi, Lemon, Mango, Orange, Peach,
+        Pear, Strawberry, Watermelon
+      </p>
+      <div class="container">
+        <input
+          id="fruitInput"
+          type="text"
+          class="demo-input"
+          placeholder="Type from the beginning..."
+          autocomplete="off"
+        />
+        <div id="fruitSuggestions" class="suggestions"></div>
+      </div>
+      <div class="code-block">
+        <pre><code class="language-javascript">new Suggest.Local('fruitInput', 'fruitSuggestions', fruits, {
+  prefix: true,
+  highlight: true
+});</code></pre>
+      </div>
+
+      <script>
+        // Fruit data
+        const fruits = [
+          "Apple",
+          "Banana",
+          "Cherry",
+          "Date",
+          "Elderberry",
+          "Fig",
+          "Grape",
+          "Honeydew",
+          "Kiwi",
+          "Lemon",
+          "Mango",
+          "Orange",
+          "Peach",
+          "Pear",
+          "Strawberry",
+          "Watermelon",
+        ];
+
+        // Prefix search
+        new Suggest.Local("fruitInput", "fruitSuggestions", fruits, {
+          prefix: true,
+          highlight: true,
+        });
+      </script>
+    </div>
+
+    <div class="github-link">
+      <a href="https://github.com/onozaty/suggest.js" target="_blank"
+        >View source code on GitHub</a
+      >
+    </div>
+  </body>
+</html>

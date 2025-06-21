@@ -1,0 +1,48 @@
+{
+  "name": "@onozaty/suggest",
+  "version": "3.0.0-beta.6",
+  "description": "Input Suggest Library",
+  "main": "./dist/suggest.cjs",
+  "module": "./dist/suggest.mjs",
+  "types": "./dist/suggest.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/suggest.d.ts",
+      "import": "./dist/suggest.mjs",
+      "require": "./dist/suggest.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "format": "prettier --write src/**/*.ts test/**/*.ts *.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/onozaty/suggest.js"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^24.0.3",
+    "jsdom": "^26.1.0",
+    "prettier": "^3.5.3",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.3"
+  },
+  "keywords": [
+    "suggest",
+    "autocomplete",
+    "input",
+    "javascript"
+  ],
+  "author": "onozaty",
+  "license": "MIT"
+}
