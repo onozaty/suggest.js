@@ -472,7 +472,8 @@ class SuggestLocalMulti extends SuggestLocal {
     if (pos === -1) {
       this.input.value = text;
     } else {
-      this.input.value = this.input.value.substring(0, pos + this.delim.length) + text;
+      this.input.value =
+        this.input.value.substring(0, pos + this.delim.length) + text;
     }
   }
 

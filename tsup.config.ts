@@ -17,8 +17,8 @@ export default defineConfig({
   platform: "browser",
   outExtension({ format }) {
     return {
-      js: format === "iife" ? ".js" : format === "esm" ? ".mjs" : ".cjs"
-    }
+      js: format === "iife" ? ".js" : format === "esm" ? ".mjs" : ".cjs",
+    };
   },
   esbuildOptions(options) {
     const repositoryUrl =

@@ -40,136 +40,74 @@ pnpm add @onozaty/suggest
 
 ## Basic Usage
 
-### HTML Setup
-
-```html
-<style>
-  .suggestions {
-    position: absolute;
-    background: white;
-    border: 1px solid #ccc;
-    width: 200px;
-    z-index: 1;
-  }
-
-  .suggestions div {
-    overflow: hidden;
-    white-space: nowrap;
-  }
-
-  .suggestions div.over {
-    background-color: #f0f0f0;
-  }
-
-  .suggestions div.select {
-    background-color: #e3f2fd;
-  }
-</style>
-
-<input id="searchInput" type="text" autocomplete="off" placeholder="Start typing...">
-<div id="suggestions" class="suggestions"></div>
-```
-
-### JavaScript/TypeScript (with bundler)
-
-```typescript
-import { Suggest } from '@onozaty/suggest';
-
-// Sample data
-const countries = [
-  'United States',
-  'United Kingdom', 
-  'Japan',
-  'Germany',
-  'France',
-  'Canada',
-  'Australia'
-];
-
-// Basic usage
-new Suggest.Local('searchInput', 'suggestions', countries);
-
-// With options
-new Suggest.Local('searchInput', 'suggestions', countries, {
-  dispMax: 10,           // Maximum suggestions to display
-  interval: 300,         // Search delay in milliseconds
-  prefix: false,         // Allow partial matching (not just prefix)
-  ignoreCase: true,      // Case-insensitive search
-  highlight: true,       // Highlight matching text
-  dispAllKey: true,      // Allow Ctrl+Down to show all suggestions
-  classMouseOver: 'hover', // CSS class for mouse hover
-  classSelect: 'selected'  // CSS class for keyboard selection
-});
-```
-
-### CDN Usage
+Complete working example:
 
 ```html
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Suggest.js CDN Example</title>
   <style>
-  .suggestions {
-    position: absolute;
-    background: white;
-    border: 1px solid #ccc;
-    width: 200px;
-    z-index: 1;
-  }
-
-  .suggestions div {
-    overflow: hidden;
-    white-space: nowrap;
-  }
-
-  .suggestions div.over {
-    background-color: #f0f0f0;
-  }
-
-  .suggestions div.select {
-    background-color: #e3f2fd;
-  }
+    .suggestions {
+      position: absolute;
+      background: white;
+      border: 1px solid #ccc;
+      width: 200px;
+      z-index: 1;
+    }
+    .suggestions div {
+      padding: 4px;
+      cursor: pointer;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .suggestions div.over {
+      background-color: #f0f0f0;
+    }
+    .suggestions div.select {
+      background-color: #e3f2fd;
+    }
   </style>
 </head>
 <body>
   <input id="searchInput" type="text" autocomplete="off" placeholder="Start typing...">
-  <div id="suggestions" class="suggestions"></div>
+  <div id="suggestions" class="suggestions" style="display:none;"></div>
 
   <script src="https://unpkg.com/@onozaty/suggest@latest/dist/suggest.js"></script>
   <script>
     const countries = [
-      'United States',
-      'United Kingdom', 
-      'Japan',
-      'Germany',
-      'France',
-      'Canada',
-      'Australia'
+      'United States', 'United Kingdom', 'Japan',
+      'Germany', 'France', 'Canada', 'Australia'
     ];
 
-    // Global Suggest object is available
-    new Suggest.Local('searchInput', 'suggestions', countries, {
-      dispMax: 10,
-      highlight: true
-    });
+    // Basic usage
+    new Suggest.Local('searchInput', 'suggestions', countries);
   </script>
 </body>
 </html>
 ```
 
-### Multi-token Input
+### Using with Package Managers
 
-For inputs that accept multiple values separated by delimiters:
+Install via npm/yarn/pnpm and import:
 
 ```typescript
 import { Suggest } from '@onozaty/suggest';
 
-const tags = ['javascript', 'typescript', 'react', 'vue', 'angular', 'node.js'];
+const data = ['apple', 'banana', 'cherry'];
+new Suggest.Local('inputId', 'suggestionsId', data, {
+  highlight: true
+});
+```
+
+### Multi-token Input
+
+For inputs that accept multiple values with delimiters:
+
+```javascript
+const tags = ['javascript', 'typescript', 'react', 'vue'];
 
 new Suggest.LocalMulti('tagsInput', 'tagSuggestions', tags, {
-  delim: ', ',           // Delimiter between values
-  dispMax: 5,
+  delim: ', ',  // Custom delimiter
   highlight: true
 });
 ```

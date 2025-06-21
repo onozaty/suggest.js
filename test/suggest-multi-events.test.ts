@@ -9,23 +9,23 @@ const DEFAULT_CANDIDATE_LIST = [
   "pineapple",
 ];
 
-describe("Suggest.LocalMulti - イベントテスト", () => {
-  test("複数入力で順次サジェスト", async () => {
+describe("Suggest.LocalMulti - Event Tests", () => {
+  test("sequential suggestions with multiple inputs", async () => {
     const { input, suggestArea, user } = setupSuggestLocalMulti(
       DEFAULT_CANDIDATE_LIST,
     );
 
-    // 初期状態では候補は表示されない
+    // No suggestions are displayed in initial state
     await user.click(input);
     const suggestItems = await waitForSuggestUpdate(suggestArea);
     expect(suggestItems).toEqual([]);
 
-    // 入力を開始
+    // Start typing
     await user.type(input, "app");
     const suggestItems1 = await waitForSuggestUpdate(suggestArea);
     expect(suggestItems1).toEqual(["apple", "pineapple"]);
 
-    // 下矢印キーを押してアクティブ候補を選択
+    // Press down arrow key to select active suggestion
     await user.keyboard("{ArrowDown}");
     expect(input.value).toBe("apple");
     expect(suggestArea.children[0].className).toBe("select");
@@ -36,29 +36,29 @@ describe("Suggest.LocalMulti - イベントテスト", () => {
     expect(suggestArea.children[0].className).toBe("");
     expect(suggestArea.children[1].className).toBe("select");
 
-    // Enterキーで確定
+    // Confirm with Enter key
     await user.keyboard("{Enter}");
     expect(input.value).toBe("pineapple ");
     expect(suggestArea.style.display).toBe("none");
 
-    // 再度入力して新しい候補を表示
+    // Type again to show new suggestions
     await user.type(input, "ba");
 
     const suggestItems2 = await waitForSuggestUpdate(suggestArea);
     expect(suggestItems2).toEqual(["banana"]);
 
-    // 下矢印キーで候補選択
+    // Select suggestion with down arrow key
     await user.keyboard("{ArrowDown}");
     expect(input.value).toBe("pineapple banana");
     expect(suggestArea.children[0].className).toBe("select");
 
-    // Tabキーで確定
+    // Confirm with Tab key
     await user.keyboard("{Tab}");
     expect(input.value).toBe("pineapple banana ");
     expect(suggestArea.style.display).toBe("none");
   });
 
-  test("マウスクリックで候補選択と区切り文字追加", async () => {
+  test("suggestion selection with mouse click and delimiter addition", async () => {
     const { input, suggestArea, user } = setupSuggestLocalMulti(
       DEFAULT_CANDIDATE_LIST,
     );
@@ -69,7 +69,7 @@ describe("Suggest.LocalMulti - イベントテスト", () => {
     const suggestItems = await waitForSuggestUpdate(suggestArea);
     expect(suggestItems).toEqual(["cherry"]);
 
-    // 最初の候補をクリック
+    // Click the first suggestion
     const firstSuggestion = suggestArea.children[0];
     await user.click(firstSuggestion);
 
@@ -77,7 +77,7 @@ describe("Suggest.LocalMulti - イベントテスト", () => {
     expect(suggestArea.style.display).toBe("none");
   });
 
-  test("オプション: カスタム区切り文字（カンマ）", async () => {
+  test("option: custom delimiter (comma)", async () => {
     const { input, suggestArea, user } = setupSuggestLocalMulti(
       DEFAULT_CANDIDATE_LIST,
       { delim: "," },
@@ -89,61 +89,61 @@ describe("Suggest.LocalMulti - イベントテスト", () => {
     const suggestItems = await waitForSuggestUpdate(suggestArea);
     expect(suggestItems).toEqual(["cherry"]);
 
-    // Enterで確定
+    // Confirm with Enter
     await user.keyboard("{ArrowDown}");
     await user.keyboard("{Enter}");
 
     expect(input.value).toBe("apple,banana,cherry,");
   });
 
-  test("オプション: カスタム区切り文字（複数文字）", async () => {
+  test("option: custom delimiter (multiple characters)", async () => {
     const { input, suggestArea, user } = setupSuggestLocalMulti(
       DEFAULT_CANDIDATE_LIST,
       { delim: ", " },
     );
 
-    // 初期状態では候補は表示されない
+    // No suggestions are displayed in initial state
     await user.click(input);
     const suggestItems = await waitForSuggestUpdate(suggestArea);
     expect(suggestItems).toEqual([]);
 
-    // 入力を開始
+    // Start typing
     await user.type(input, "app");
     const suggestItems1 = await waitForSuggestUpdate(suggestArea);
     expect(suggestItems1).toEqual(["apple", "pineapple"]);
 
-    // 下矢印キーを押してアクティブ候補を選択
+    // Press down arrow key to select active suggestion
     await user.keyboard("{ArrowDown}");
     expect(input.value).toBe("apple");
     expect(suggestArea.children[0].className).toBe("select");
     expect(suggestArea.children[1].className).toBe("");
 
-    // Enterキーで確定
+    // Confirm with Enter key
     await user.keyboard("{Enter}");
     expect(input.value).toBe("apple, ");
     expect(suggestArea.style.display).toBe("none");
 
-    // 再度入力して新しい候補を表示
+    // Type again to show new suggestions
     await user.type(input, "ba");
 
     const suggestItems2 = await waitForSuggestUpdate(suggestArea);
     expect(suggestItems2).toEqual(["banana"]);
 
-    // 下矢印キーで候補選択
+    // Select suggestion with down arrow key
     await user.keyboard("{ArrowDown}");
     expect(input.value).toBe("apple, banana");
     expect(suggestArea.children[0].className).toBe("select");
 
-    // Tabキーで確定
+    // Confirm with Tab key
     await user.keyboard("{Tab}");
     expect(input.value).toBe("apple, banana, ");
     expect(suggestArea.style.display).toBe("none");
   });
 
-  test("オプション: インターバル", async () => {
+  test("option: interval", async () => {
     const { input, suggestArea, user } = setupSuggestLocalMulti(
       DEFAULT_CANDIDATE_LIST,
-      { interval: 100 }, // インターバルを100msに設定
+      { interval: 100 }, // Set interval to 100ms
     );
 
     await user.click(input);
@@ -153,7 +153,7 @@ describe("Suggest.LocalMulti - イベントテスト", () => {
     expect(suggestItems).toEqual(["banana"]);
   });
 
-  test("オプション: 表示件数", async () => {
+  test("option: display count", async () => {
     const { input, suggestArea, user } = setupSuggestLocalMulti(
       DEFAULT_CANDIDATE_LIST,
       { dispMax: 2 },
@@ -163,10 +163,10 @@ describe("Suggest.LocalMulti - イベントテスト", () => {
     await user.type(input, "apple a");
 
     const suggestItems = await waitForSuggestUpdate(suggestArea);
-    expect(suggestItems).toEqual(["apple", "banana"]); // 2件のみ表示される
+    expect(suggestItems).toEqual(["apple", "banana"]); // Only 2 items displayed
   });
 
-  test("オプション: リストタグ名", async () => {
+  test("option: list tag name", async () => {
     const { input, suggestArea, user } = setupSuggestLocalMulti(
       DEFAULT_CANDIDATE_LIST,
       { listTagName: "span" },
@@ -183,7 +183,7 @@ describe("Suggest.LocalMulti - イベントテスト", () => {
     );
   });
 
-  test("オプション: プレフィックス", async () => {
+  test("option: prefix", async () => {
     const { input, suggestArea, user } = setupSuggestLocalMulti(
       DEFAULT_CANDIDATE_LIST,
       { prefix: true },
@@ -192,12 +192,12 @@ describe("Suggest.LocalMulti - イベントテスト", () => {
     await user.click(input);
     await user.type(input, "orange app");
 
-    // プレフィックス検索なので 'pineapple' は表示されない
+    // 'pineapple' is not displayed because of prefix search
     const suggestItems = await waitForSuggestUpdate(suggestArea);
     expect(suggestItems).toEqual(["apple"]);
   });
 
-  test("オプション: 大文字小文字を区別", async () => {
+  test("option: case sensitivity", async () => {
     const { input, suggestArea, user } = setupSuggestLocalMulti(
       ["Apple", "Cherry", "Pineapple"],
       { ignoreCase: false },
@@ -206,12 +206,12 @@ describe("Suggest.LocalMulti - イベントテスト", () => {
     await user.click(input);
     await user.type(input, "Cherry App");
 
-    // 大文字小文字が区別されるので 'Pineapple' は表示されない
+    // 'Pineapple' is not displayed because case is considered
     const suggestItems = await waitForSuggestUpdate(suggestArea);
     expect(suggestItems).toEqual(["Apple"]);
   });
 
-  test("オプション: ハイライト", async () => {
+  test("option: highlight", async () => {
     const { input, suggestArea, user } = setupSuggestLocalMulti(
       DEFAULT_CANDIDATE_LIST,
       { highlight: true },
@@ -223,13 +223,13 @@ describe("Suggest.LocalMulti - イベントテスト", () => {
     const suggestItems = await waitForSuggestUpdate(suggestArea);
     expect(suggestItems).toEqual(["apple", "pineapple"]);
 
-    // ハイライト表示されることを確認
+    // Verify highlight display
     expect(suggestArea.innerHTML).toBe(
       "<div><strong>app</strong>le</div><div>pine<strong>app</strong>le</div>",
     );
   });
 
-  test("オプション: 全件表示", async () => {
+  test("option: display all", async () => {
     const { input, suggestArea, user } = setupSuggestLocalMulti(
       DEFAULT_CANDIDATE_LIST,
       { dispAllKey: true },
@@ -238,18 +238,18 @@ describe("Suggest.LocalMulti - イベントテスト", () => {
     await user.click(input);
     await user.type(input, "orange ");
 
-    // この時点では0件
+    // No items at this point
     const suggestItems1 = await waitForSuggestUpdate(suggestArea);
     expect(suggestItems1).toEqual([]);
 
-    // Ctrl+下矢印キーを押して全件
+    // Press Ctrl+Down arrow to show all items
     await user.keyboard("{Control>}{ArrowDown}{/Control}");
 
     const suggestItems2 = await waitForSuggestUpdate(suggestArea);
-    expect(suggestItems2).toEqual(DEFAULT_CANDIDATE_LIST); // 全件表示される
+    expect(suggestItems2).toEqual(DEFAULT_CANDIDATE_LIST); // All items displayed
   });
 
-  test("オプション: classMouseOver", async () => {
+  test("option: classMouseOver", async () => {
     const { input, suggestArea, user } = setupSuggestLocalMulti(
       DEFAULT_CANDIDATE_LIST,
       { classMouseOver: "overX" },
@@ -261,16 +261,16 @@ describe("Suggest.LocalMulti - イベントテスト", () => {
 
     const firstSuggestion = suggestArea.children[0];
 
-    // マウスオーバー
+    // Mouse over
     await user.hover(firstSuggestion);
     expect(firstSuggestion.className).toBe("overX");
 
-    // マウスアウト（他の要素にhoverして外す）
+    // Mouse out (hover over another element to remove)
     await user.hover(input);
     expect(firstSuggestion.className).toBe("");
   });
 
-  test("オプション: classSelect", async () => {
+  test("option: classSelect", async () => {
     const { input, suggestArea, user } = setupSuggestLocalMulti(
       DEFAULT_CANDIDATE_LIST,
       { classSelect: "selectX" },
@@ -281,10 +281,10 @@ describe("Suggest.LocalMulti - イベントテスト", () => {
 
     const suggestItems = await waitForSuggestUpdate(suggestArea);
 
-    // サジェストが表示されていることを確認
+    // Verify suggestions are displayed
     expect(suggestItems).toEqual(["cherry", "elderberry"]);
 
-    // 下矢印キーを押してアクティブ候補を選択
+    // Press down arrow key to select active suggestion
     await user.keyboard("{ArrowDown}");
 
     expect(input.value).toBe("orange cherry");

@@ -46,6 +46,11 @@ pnpm typecheck
 pnpm format
 ```
 
+**Important**: After editing any code files, always run the following commands to ensure code quality:
+1. `pnpm format` - Format code with Prettier
+2. `pnpm typecheck` - Verify TypeScript types
+3. `pnpm test` - Run all tests to ensure functionality
+
 ## Testing Framework
 
 - **Test runner**: Vitest with jsdom environment
