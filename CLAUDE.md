@@ -51,6 +51,19 @@ pnpm format
 2. `pnpm typecheck` - Verify TypeScript types
 3. `pnpm test` - Run all tests to ensure functionality
 
+## Version Release Checklist
+
+When updating the version in `package.json`, ensure to update CDN URLs in the following files:
+- `README.md` - Update all `@onozaty/suggest@X.X.X` URLs in CDN examples
+- `docs/index.html` - Update the script tag with the new version number
+
+**Example**: If version changes from `3.0.0` to `3.1.0`, update:
+```
+https://unpkg.com/@onozaty/suggest@3.0.0/dist/suggest.js
+↓
+https://unpkg.com/@onozaty/suggest@3.1.0/dist/suggest.js
+```
+
 ## Testing Framework
 
 - **Test runner**: Vitest with jsdom environment

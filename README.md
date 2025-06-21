@@ -30,11 +30,11 @@ pnpm add @onozaty/suggest
 
 ```html
 <!-- IIFE version (creates global Suggest object) -->
-<script src="https://unpkg.com/@onozaty/suggest@latest/dist/suggest.js"></script>
+<script src="https://unpkg.com/@onozaty/suggest@3.0.0/dist/suggest.js"></script>
 
 <!-- ES Module -->
 <script type="module">
-  import { Suggest } from 'https://unpkg.com/@onozaty/suggest@latest/dist/suggest.mjs';
+  import { Suggest } from 'https://unpkg.com/@onozaty/suggest@3.0.0/dist/suggest.mjs';
 </script>
 ```
 
@@ -72,7 +72,7 @@ Complete working example:
   <input id="searchInput" type="text" autocomplete="off" placeholder="Start typing...">
   <div id="suggestions" class="suggestions" style="display:none;"></div>
 
-  <script src="https://unpkg.com/@onozaty/suggest@latest/dist/suggest.js"></script>
+  <script src="https://unpkg.com/@onozaty/suggest@3.0.0/dist/suggest.js"></script>
   <script>
     const countries = [
       'United States', 'United Kingdom', 'Japan',
